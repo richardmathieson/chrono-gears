@@ -14,7 +14,9 @@ import {
   TOP_TRACK_SPEED,
   TRACK_TIMER,
   SPAWN_DELAY,
-  AUTO_FLOW_INTERVAL
+  AUTO_FLOW_INTERVAL,
+  PIPE_GREEN,
+  DESERT_DARK
 } from '../utils/constants.js';
 
 export class Game {
@@ -178,9 +180,6 @@ export class Game {
   
   createTopTrackMesh() {
     const trackLength = this.topTrack.endX - this.topTrack.startX;
-
-    // Import green pipe color
-    const { PIPE_GREEN, DESERT_DARK } = require('../utils/constants.js');
 
     // Main track - green pipe
     const trackGeom = new THREE.CylinderGeometry(0.5, 0.5, trackLength, 8);
