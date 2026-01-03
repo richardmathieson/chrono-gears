@@ -20,7 +20,7 @@ export class SceneManager {
 
     // Orthographic camera - Desert Strike style top-down view!
     const aspect = window.innerWidth / window.innerHeight;
-    const frustumSize = 25; // Tighter view to fit everything
+    const frustumSize = 35; // Wider view to see everything!
 
     this.camera = new THREE.OrthographicCamera(
       -frustumSize * aspect / 2,
@@ -31,9 +31,9 @@ export class SceneManager {
       1000
     );
 
-    // Top-down isometric-ish view
-    this.camera.position.set(0, 50, 8);
-    this.camera.lookAt(0, 0, 0);
+    // Top-down view, looking at center of play area
+    this.camera.position.set(0, 50, 4);
+    this.camera.lookAt(0, 0, 4);
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
@@ -143,7 +143,7 @@ export class SceneManager {
   
   onResize() {
     const aspect = window.innerWidth / window.innerHeight;
-    const frustumSize = 25;
+    const frustumSize = 35;
 
     this.camera.left = -frustumSize * aspect / 2;
     this.camera.right = frustumSize * aspect / 2;
