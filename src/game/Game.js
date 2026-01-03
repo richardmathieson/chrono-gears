@@ -332,10 +332,18 @@ export class Game {
     const ball = this.topTrackBall;
     this.topTrackBall = null;
 
+    // Add ball to update loop during drop animation
+    if (!this.balls.includes(ball)) {
+      this.balls.push(ball);
+    }
+
     // Animate ball dropping with momentum! 🎢
     ball.startDropAnimation(wheel, DIRECTIONS.TOP, () => {
       wheel.placeBallInSlot(DIRECTIONS.TOP, ball);
       ball.isMoving = false;
+
+      // Remove from balls array since it's now placed in wheel
+      this.balls = this.balls.filter(b => b !== ball);
 
       setTimeout(() => this.checkMatch(wheel), 100);
     });
