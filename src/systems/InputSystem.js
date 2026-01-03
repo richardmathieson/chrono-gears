@@ -132,22 +132,16 @@ export class InputSystem {
   
   endGesture() {
     if (!this.touchStartPos) return;
-    
+
     const duration = Date.now() - this.touchStartTime;
-    
-    if (this.isDragging && this.dragDirection !== null && this.touchedWheelIndex >= 0) {
-      // SWIPE = Eject ball in that direction! 🎯
-      console.log(`Swipe eject: direction ${this.dragDirection}`);
-      const wheel = this.game.wheels[this.touchedWheelIndex];
-      if (wheel) {
-        this.game.ejectBallFromWheel(wheel, this.dragDirection);
-      }
-    } else if (this.touchedWheelIndex >= 0 && duration < this.tapMaxDuration) {
+
+    // AUTO-RELEASE MODE: No manual ejection, only rotation! ⚙️
+    if (this.touchedWheelIndex >= 0 && duration < this.tapMaxDuration) {
       // TAP = Rotate wheel! ⚙️
       console.log(`Tap rotate wheel ${this.touchedWheelIndex}`);
       this.game.rotateSelectedWheel();
     }
-    
+
     this.hideDirectionIndicator();
     this.touchStartPos = null;
     this.touchedWheelIndex = -1;
@@ -269,15 +263,9 @@ export class InputSystem {
       event.preventDefault();
       return;
     }
-    
-    // ARROWS - Eject ball
-    const wheel = this.game.wheels[this.game.selectedWheelIndex];
-    if (wheel) {
-      if (event.code === 'ArrowUp') { this.game.ejectBallFromWheel(wheel, DIRECTIONS.TOP); event.preventDefault(); return; }
-      if (event.code === 'ArrowDown') { this.game.ejectBallFromWheel(wheel, DIRECTIONS.BOTTOM); event.preventDefault(); return; }
-      if (event.code === 'ArrowLeft') { this.game.ejectBallFromWheel(wheel, DIRECTIONS.LEFT); event.preventDefault(); return; }
-      if (event.code === 'ArrowRight') { this.game.ejectBallFromWheel(wheel, DIRECTIONS.RIGHT); event.preventDefault(); return; }
-    }
+
+    // AUTO-RELEASE MODE: Arrow keys disabled for manual ejection
+    // Balls flow automatically when facing a connected pipe!
     
     if (event.code === 'KeyP' || event.code === 'Escape') {
       this.game.pause();
