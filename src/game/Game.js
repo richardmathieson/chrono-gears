@@ -328,19 +328,23 @@ export class Game {
   
   dropBallIntoWheel(wheel) {
     if (!this.topTrackBall) return;
-    
+
     const ball = this.topTrackBall;
     this.topTrackBall = null;
-    
-    wheel.placeBallInSlot(DIRECTIONS.TOP, ball);
-    ball.isMoving = false;
-    
+
+    // Animate ball dropping with momentum! 🎢
+    ball.startDropAnimation(wheel, DIRECTIONS.TOP, () => {
+      wheel.placeBallInSlot(DIRECTIONS.TOP, ball);
+      ball.isMoving = false;
+
+      setTimeout(() => this.checkMatch(wheel), 100);
+    });
+
     console.log(`🎯 Ball dropped into wheel ${wheel.index}!`);
-    
+
     this.trackTimer = this.trackTimerMax;
     this.isTimerActive = false;
-    
-    setTimeout(() => this.checkMatch(wheel), 100);
+
     setTimeout(() => {
       if (this.isRunning && !this.topTrackBall) this.spawnTopTrackBall();
     }, SPAWN_DELAY);

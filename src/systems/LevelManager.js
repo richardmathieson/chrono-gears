@@ -45,27 +45,44 @@ export class LevelManager {
         ],
         
         pipes: [
+          // Horizontal pipes connecting wheels (for auto-flow!)
+          {
+            startX: -1.5, startZ: 0,
+            endX: 0, endZ: 0,
+            startWheelIndex: 0,
+            startDirection: RIGHT,
+            endWheelIndex: 1,
+            endDirection: LEFT
+          },
+          {
+            startX: 0, startZ: 0,
+            endX: 1.5, endZ: 0,
+            startWheelIndex: 1,
+            startDirection: RIGHT,
+            endWheelIndex: 2,
+            endDirection: LEFT
+          },
           // Vertical pipes from wheels DOWN to bins
-          { 
+          {
             startX: -1.5, startZ: 0,
             endX: -1.5, endZ: 1.5,
-            startWheelIndex: 0, 
+            startWheelIndex: 0,
             startDirection: BOTTOM,
             endBinIndex: 0,
             endDirection: TOP
           },
-          { 
+          {
             startX: 0, startZ: 0,
             endX: 0, endZ: 1.5,
-            startWheelIndex: 1, 
+            startWheelIndex: 1,
             startDirection: BOTTOM,
             endBinIndex: 1,
             endDirection: TOP
           },
-          { 
+          {
             startX: 1.5, startZ: 0,
             endX: 1.5, endZ: 1.5,
-            startWheelIndex: 2, 
+            startWheelIndex: 2,
             startDirection: BOTTOM,
             endBinIndex: 2,
             endDirection: TOP

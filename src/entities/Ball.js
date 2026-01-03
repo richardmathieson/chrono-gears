@@ -5,22 +5,30 @@ export class Ball {
   constructor(x, z, color, colorName) {
     this.color = color;
     this.colorName = colorName;
-    
+
     // Pipe travel state
     this.currentPipe = null;
     this.pipeProgress = 0;
     this.movingForward = true;
     this.checkedEntry = false;
-    
+
     // State
     this.isPlaced = false;
     this.isMoving = true;
     this.isExploding = false;
-    
+
+    // Drop animation state
+    this.isDropping = false;
+    this.dropStartY = 0;
+    this.dropVelocityY = 0;
+    this.dropTargetWheel = null;
+    this.dropDirection = null;
+    this.dropCallback = null;
+
     // Three.js
     this.mesh = null;
     this.glowMesh = null;
-    
+
     this.createMesh(x, z);
   }
   
@@ -64,7 +72,12 @@ export class Ball {
       this.mesh.material.opacity = Math.max(0, (this.mesh.material.opacity || 1) - deltaTime * 3);
       return;
     }
-    
+
+    if (this.isDropping) {
+      this.updateDropAnimation(deltaTime);
+      return;
+    }
+
     if (this.isPlaced) {
       // Gentle float animation
       this.mesh.position.y = 0.5 + Math.sin(Date.now() * 0.004) * 0.03;
@@ -175,11 +188,63 @@ export class Ball {
     pipe.balls.push(this);
   }
   
+  startDropAnimation(targetWheel, direction, onComplete) {
+    this.isDropping = true;
+    this.isMoving = false;
+    this.dropStartY = this.mesh.position.y;
+    this.dropVelocityY = 0; // Start with horizontal momentum
+    this.dropTargetWheel = targetWheel;
+    this.dropDirection = direction;
+    this.dropCallback = onComplete;
+
+    // Get the final position where ball will land in the wheel
+    const slotAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
+    const slot = targetWheel.worldDirToSlot(direction);
+    const worldAngle = slotAngles[slot] + targetWheel.visualAngle;
+    const localX = Math.cos(worldAngle) * 1.4; // SLOT_DISTANCE
+    const localZ = Math.sin(worldAngle) * 1.4;
+
+    this.dropTargetX = targetWheel.x + localX;
+    this.dropTargetZ = targetWheel.z + localZ;
+  }
+
+  updateDropAnimation(deltaTime) {
+    // Accelerate downward (like going down a hill!)
+    const gravity = 15; // Acceleration
+    this.dropVelocityY += gravity * deltaTime;
+
+    // Update Y position
+    this.mesh.position.y -= this.dropVelocityY * deltaTime;
+
+    // Move toward target slot position
+    const speed = 6;
+    const dx = this.dropTargetX - this.mesh.position.x;
+    const dz = this.dropTargetZ - this.mesh.position.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+
+    if (dist > 0.1) {
+      this.mesh.position.x += (dx / dist) * speed * deltaTime;
+      this.mesh.position.z += (dz / dist) * speed * deltaTime;
+    }
+
+    // Check if reached destination
+    if (this.mesh.position.y <= 0.5) {
+      this.mesh.position.y = 0.5;
+      this.isDropping = false;
+      this.dropVelocityY = 0;
+
+      if (this.dropCallback) {
+        this.dropCallback();
+        this.dropCallback = null;
+      }
+    }
+  }
+
   explode() {
     this.isExploding = true;
     this.mesh.material.transparent = true;
   }
-  
+
   getPosition() {
     return {
       x: this.mesh.position.x,
