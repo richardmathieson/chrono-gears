@@ -1,0 +1,20 @@
+{
+  "name": "logical-game",
+  "version": "1.0.0",
+  "description": "A puzzle game inspired by Logical (Amiga) with Syndicate/C&C aesthetics",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["game", "puzzle", "threejs"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.5"
+  }
+}

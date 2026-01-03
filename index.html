@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>CHRONO GEARS ⚙️</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- HUD -->
+    <div id="hud">
+      <div id="level-container">
+        <span id="level-label">LEVEL</span>
+        <span id="level">01</span>
+      </div>
+      <div id="track-timer-container">
+        <span id="track-timer-label">⏱️</span>
+        <span id="track-timer">--</span>
+      </div>
+      <div id="wheels-container">
+        <span id="wheels-label">GEARS</span>
+        <span id="wheels-remaining">3</span>
+      </div>
+      <div id="next-ball-container">
+        <span id="next-ball-label">NEXT</span>
+        <div id="next-ball-indicator"></div>
+      </div>
+    </div>
+    
+    <div id="timer" style="display:none;">0:00.0</div>
+    
+    <!-- Game Over -->
+    <div id="game-over" class="overlay hidden">
+      <h1>⏱️ TIME UP!</h1>
+      <p>The gem didn't reach a gear in time!</p>
+      <button id="retry-btn">TRY AGAIN</button>
+    </div>
+    
+    <!-- Level Complete -->
+    <div id="level-complete" class="overlay hidden">
+      <h1>⚙️ COMPLETE! ⚙️</h1>
+      <div id="time-results">
+        <div class="time-row">
+          <span class="time-label">YOUR TIME</span>
+          <span id="complete-time" class="time-value">0:00.0</span>
+        </div>
+        <div class="time-row">
+          <span class="time-label">BEST</span>
+          <span id="complete-best" class="time-value best">0:00.0</span>
+        </div>
+        <span id="new-best-badge" class="hidden">🏆 NEW BEST!</span>
+      </div>
+      <button id="next-btn">NEXT LEVEL</button>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="overlay">
+      <h1>⚙️ CHRONO GEARS ⚙️</h1>
+      <p class="tagline">A Puzzle of Timing & Flow</p>
+      <button id="start-btn">START</button>
+      <div class="start-controls">
+        <p class="hint-main">Gems travel along the top track</p>
+        <p class="hint-main">They drop into gears with empty slots!</p>
+        <p class="hint-small">👆 TAP gear to rotate it</p>
+        <p class="hint-small">👆 SWIPE on gear to eject gem</p>
+        <p class="hint-highlight">🔄 Gems AUTO-FLOW through tracks!</p>
+        <p class="hint-highlight">⚙️ ROTATE to "park" gems away from tracks</p>
+        <p class="hint-small">⏱️ Timer counts down while gem travels!</p>
+        <p class="hint-small">🎯 Fill gear with 4 same-color gems to clear!</p>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+
