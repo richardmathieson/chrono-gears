@@ -3,10 +3,5 @@
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "vite",
-  "git": {
-    "deploymentEnabled": {
-      "main": true
-    }
-  }
+  "framework": "vite"
 }
