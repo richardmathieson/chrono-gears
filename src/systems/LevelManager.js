@@ -61,38 +61,7 @@ export class LevelManager {
             startDirection: RIGHT,
             endWheelIndex: 2,
             endDirection: LEFT
-          },
-          // Vertical pipes from wheels DOWN to bins
-          {
-            startX: -1.5, startZ: 0,
-            endX: -1.5, endZ: 1.5,
-            startWheelIndex: 0,
-            startDirection: BOTTOM,
-            endBinIndex: 0,
-            endDirection: TOP
-          },
-          {
-            startX: 0, startZ: 0,
-            endX: 0, endZ: 1.5,
-            startWheelIndex: 1,
-            startDirection: BOTTOM,
-            endBinIndex: 1,
-            endDirection: TOP
-          },
-          {
-            startX: 1.5, startZ: 0,
-            endX: 1.5, endZ: 1.5,
-            startWheelIndex: 2,
-            startDirection: BOTTOM,
-            endBinIndex: 2,
-            endDirection: TOP
           }
-        ],
-        
-        bins: [
-          { x: -1.5, z: 1.5, direction: TOP, acceptedColors: 'ALL' },
-          { x: 0, z: 1.5, direction: TOP, acceptedColors: 'ALL' },
-          { x: 1.5, z: 1.5, direction: TOP, acceptedColors: 'ALL' }
         ]
       }
     ];

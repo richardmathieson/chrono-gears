@@ -32,7 +32,7 @@ export const ROTATION_SPEED = Math.PI / 2;
 export const ROTATION_DURATION = 150;
 export const BALL_SPEED = 5; // Speed on tracks
 export const TOP_TRACK_SPEED = 4; // Speed on top track
-export const AUTO_FLOW_DELAY = 300; // ms before ball auto-flows
+export const AUTO_FLOW_INTERVAL = 2000; // Synchronized auto-release every 2 seconds!
 
 // Game timing
 export const TRACK_TIMER = 10; // Seconds before game over if ball doesn't drop!

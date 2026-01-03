@@ -6,15 +6,15 @@ import { Pipe } from '../entities/Pipe.js';
 import { Bin } from '../entities/Bin.js';
 import { InputSystem } from '../systems/InputSystem.js';
 import { LevelManager } from '../systems/LevelManager.js';
-import { 
-  BALL_COLORS, 
+import {
+  BALL_COLORS,
   BALL_COLOR_NAMES,
   GRID_SPACING,
   DIRECTIONS,
   TOP_TRACK_SPEED,
   TRACK_TIMER,
   SPAWN_DELAY,
-  AUTO_FLOW_DELAY
+  AUTO_FLOW_INTERVAL
 } from '../utils/constants.js';
 
 export class Game {
@@ -45,9 +45,9 @@ export class Game {
     this.ballQueue = [];
     this.colorCount = 2;
     
-    // AUTO-FLOW SYSTEM! 🔄
+    // SYNCHRONIZED AUTO-RELEASE SYSTEM! 🔄
     this.autoFlowTimer = 0;
-    this.autoFlowInterval = AUTO_FLOW_DELAY / 1000; // Convert to seconds
+    this.autoFlowInterval = AUTO_FLOW_INTERVAL / 1000; // 2 seconds between releases
     
     // Countdown timer
     this.trackTimer = TRACK_TIMER;
@@ -358,39 +358,41 @@ export class Game {
     }, SPAWN_DELAY);
   }
   
-  // ============ AUTO-FLOW MECHANIC! 🔄 ============
-  // Balls automatically move to empty slots on connected wheels!
+  // ============ SYNCHRONIZED AUTO-RELEASE! 🔄 ============
+  // Every 2 seconds, ALL wheels release their balls simultaneously!
   // Players "park" balls by rotating to face non-track directions!
-  
+
   checkAutoFlow() {
-    // Find all balls that could flow
-    let flowHappened = false;
-    
+    console.log('🔓 CLAMPS RELEASE! Auto-flow triggered!');
+
+    // Trigger visual clamp release on all wheels
+    this.wheels.forEach(wheel => wheel.triggerClampRelease());
+
+    // Collect ALL balls that can flow from ALL wheels
+    const allFlowableBalls = [];
+
     for (const wheel of this.wheels) {
       const flowableBalls = wheel.getBallsReadyToFlow(this);
-      
-      if (flowableBalls.length > 0) {
-        // Flow the first available ball
-        const { ball, worldDir, pipe, targetWheel, targetDir } = flowableBalls[0];
-        
-        // Remove from current wheel
-        wheel.removeBallFromSlot(worldDir);
-        
-        // Start traveling on pipe
-        const exitFromStart = (pipe.startWheel === wheel);
-        ball.startOnPipe(pipe, exitFromStart);
-        
-        if (!this.balls.includes(ball)) {
-          this.balls.push(ball);
-        }
-        
-        console.log(`🔄 AUTO-FLOW: Ball moving from wheel ${wheel.index} to wheel ${targetWheel.index}`);
-        flowHappened = true;
-        break; // Only one flow per check to prevent chaos
-      }
+      allFlowableBalls.push(...flowableBalls);
     }
-    
-    return flowHappened;
+
+    // Release them all at once!
+    for (const { ball, worldDir, pipe, targetWheel, wheel } of allFlowableBalls) {
+      // Remove from current wheel
+      wheel.removeBallFromSlot(worldDir);
+
+      // Start traveling on pipe
+      const exitFromStart = (pipe.startWheel === wheel);
+      ball.startOnPipe(pipe, exitFromStart);
+
+      if (!this.balls.includes(ball)) {
+        this.balls.push(ball);
+      }
+
+      console.log(`🔄 RELEASE: Ball from wheel ${wheel.index} → wheel ${targetWheel.index}`);
+    }
+
+    return allFlowableBalls.length > 0;
   }
   
   // ============ WHEEL INTERACTION ============

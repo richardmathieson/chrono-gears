@@ -32,12 +32,17 @@ export class Wheel {
     this.isSelected = false;
     this.isCleared = false;
     this.isHovered = false;
-    
+
+    // Clamp system for visual auto-release feedback
+    this.clamps = [];
+    this.clampAnimationTime = 0;
+    this.isClampReleasing = false;
+
     this.group = new THREE.Group();
     this.wheelMesh = null;
     this.selectionRing = null;
     this.colorIndicator = null;
-    
+
     this.createMesh();
   }
   
@@ -146,7 +151,50 @@ export class Wheel {
     this.selectionRing.position.y = 0.2;
     this.selectionRing.rotation.x = -Math.PI / 2;
     this.group.add(this.selectionRing);
-    
+
+    // CLAMPS - Visual indicators for auto-release! 🔒
+    // Four clamps positioned at each cardinal direction
+    const clampPositions = [
+      { angle: -Math.PI / 2, name: 'top' },    // TOP
+      { angle: 0, name: 'right' },             // RIGHT
+      { angle: Math.PI / 2, name: 'bottom' },  // BOTTOM
+      { angle: Math.PI, name: 'left' }         // LEFT
+    ];
+
+    clampPositions.forEach(({ angle, name }) => {
+      const clampGroup = new THREE.Group();
+
+      // Clamp arms - two bronze bars that pinch inward
+      const armGeom = new THREE.BoxGeometry(0.8, 0.25, 0.15);
+      const armMat = new THREE.MeshBasicMaterial({ color: BRONZE_COLOR });
+
+      const leftArm = new THREE.Mesh(armGeom, armMat);
+      leftArm.position.set(-0.3, 0, 0);
+      clampGroup.add(leftArm);
+
+      const rightArm = new THREE.Mesh(armGeom, armMat);
+      rightArm.position.set(0.3, 0, 0);
+      clampGroup.add(rightArm);
+
+      // Gold pin in center
+      const pinGeom = new THREE.CylinderGeometry(0.15, 0.15, 0.3, 8);
+      const pinMat = new THREE.MeshBasicMaterial({ color: GOLD_COLOR });
+      const pin = new THREE.Mesh(pinGeom, pinMat);
+      clampGroup.add(pin);
+
+      // Position clamp at edge of wheel
+      const distance = WHEEL_RADIUS + 0.6;
+      clampGroup.position.set(
+        Math.cos(angle) * distance,
+        0.4,
+        Math.sin(angle) * distance
+      );
+      clampGroup.rotation.y = -angle;
+
+      this.wheelMesh.add(clampGroup);
+      this.clamps.push({ group: clampGroup, leftArm, rightArm, defaultX: 0.3 });
+    });
+
     // COLOR INDICATOR - shows required color
     if (this.requiredColor) {
       const indicatorColor = BALL_COLORS[this.requiredColor];
@@ -211,25 +259,63 @@ export class Wheel {
     let diff = targetAngle - this.visualAngle;
     while (diff > Math.PI) diff -= Math.PI * 2;
     while (diff < -Math.PI) diff += Math.PI * 2;
-    
+
     if (Math.abs(diff) > 0.01) {
       this.visualAngle += diff * Math.min(1, 12 * deltaTime);
     } else {
       this.visualAngle = targetAngle;
     }
-    
+
     while (this.visualAngle < 0) this.visualAngle += Math.PI * 2;
     while (this.visualAngle >= Math.PI * 2) this.visualAngle -= Math.PI * 2;
-    
+
     this.wheelMesh.rotation.y = -this.visualAngle;
-    
+
     // Selection pulse
     if (this.isSelected && !this.isCleared) {
       const pulse = 0.6 + Math.sin(Date.now() * 0.006) * 0.3;
       this.selectionRing.material.opacity = pulse;
     }
-    
+
+    // Animate clamps!
+    this.updateClamps(deltaTime);
+
     this.updateBallPositions();
+  }
+
+  triggerClampRelease() {
+    this.isClampReleasing = true;
+    this.clampAnimationTime = 0;
+  }
+
+  updateClamps(deltaTime) {
+    if (this.isClampReleasing) {
+      this.clampAnimationTime += deltaTime;
+
+      const duration = 0.4; // 400ms animation
+      const progress = Math.min(this.clampAnimationTime / duration, 1);
+
+      // Ease out cubic for smooth animation
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      // Open clamps (arms move outward)
+      const openAmount = easeProgress * 0.5; // Move 0.5 units outward
+
+      this.clamps.forEach(clamp => {
+        clamp.leftArm.position.x = -0.3 - openAmount;
+        clamp.rightArm.position.x = 0.3 + openAmount;
+      });
+
+      // Close clamps again after opening
+      if (progress >= 1) {
+        this.isClampReleasing = false;
+        // Reset to closed position
+        this.clamps.forEach(clamp => {
+          clamp.leftArm.position.x = -0.3;
+          clamp.rightArm.position.x = 0.3;
+        });
+      }
+    }
   }
   
   updateBallPositions() {
@@ -275,7 +361,8 @@ export class Wheel {
           worldDir,
           pipe,
           targetWheel,
-          targetDir
+          targetDir,
+          wheel: this  // Include reference to source wheel
         });
       }
     }
