@@ -4,10 +4,9 @@ import {
   WHEEL_SLOT_COUNT,
   SLOT_DISTANCE,
   BALL_COLORS,
-  BRONZE_COLOR,
-  COPPER_COLOR,
-  GOLD_COLOR,
-  DARK_METAL,
+  METAL_GRAY,
+  METAL_DARK,
+  PIPE_GREEN,
   DIRECTIONS
 } from '../utils/constants.js';
 
@@ -47,71 +46,41 @@ export class Wheel {
   }
   
   createMesh() {
-    // ⚙️ STEAMPUNK GEAR! ⚙️
+    // 🚁 MILITARY PLATFORM! 🚁
     this.wheelMesh = new THREE.Group();
-    
-    // MAIN GEAR DISC - bronze/copper
-    const discGeom = new THREE.CylinderGeometry(WHEEL_RADIUS, WHEEL_RADIUS, 0.3, 32);
-    const discMat = new THREE.MeshBasicMaterial({ color: BRONZE_COLOR });
+
+    // Base platform - metal gray
+    const discGeom = new THREE.CylinderGeometry(WHEEL_RADIUS, WHEEL_RADIUS, 0.4, 8);
+    const discMat = new THREE.MeshBasicMaterial({ color: METAL_GRAY });
     const disc = new THREE.Mesh(discGeom, discMat);
-    disc.position.y = 0.15;
+    disc.position.y = 0.2;
     this.wheelMesh.add(disc);
-    
-    // GEAR TEETH around edge!
-    const teethCount = 16;
-    for (let i = 0; i < teethCount; i++) {
-      const angle = (i / teethCount) * Math.PI * 2;
-      const toothGeom = new THREE.BoxGeometry(0.3, 0.35, 0.5);
-      const toothMat = new THREE.MeshBasicMaterial({ color: COPPER_COLOR });
-      const tooth = new THREE.Mesh(toothGeom, toothMat);
-      tooth.position.set(
-        Math.cos(angle) * (WHEEL_RADIUS + 0.15),
-        0.17,
-        Math.sin(angle) * (WHEEL_RADIUS + 0.15)
-      );
-      tooth.rotation.y = -angle;
-      this.wheelMesh.add(tooth);
-    }
-    
-    // OUTER RIM - darker ring
-    const rimGeom = new THREE.TorusGeometry(WHEEL_RADIUS - 0.1, 0.15, 8, 32);
-    const rimMat = new THREE.MeshBasicMaterial({ color: DARK_METAL });
+
+
+    // Dark rim
+    const rimGeom = new THREE.TorusGeometry(WHEEL_RADIUS - 0.1, 0.12, 8, 8);
+    const rimMat = new THREE.MeshBasicMaterial({ color: METAL_DARK });
     const rim = new THREE.Mesh(rimGeom, rimMat);
     rim.rotation.x = -Math.PI / 2;
-    rim.position.y = 0.25;
+    rim.position.y = 0.42;
     this.wheelMesh.add(rim);
-    
-    // INNER RIM
-    const innerRimGeom = new THREE.TorusGeometry(WHEEL_RADIUS * 0.5, 0.1, 8, 32);
-    const innerRimMat = new THREE.MeshBasicMaterial({ color: DARK_METAL });
-    const innerRim = new THREE.Mesh(innerRimGeom, innerRimMat);
-    innerRim.rotation.x = -Math.PI / 2;
-    innerRim.position.y = 0.25;
-    this.wheelMesh.add(innerRim);
-    
-    // CENTER HUB - ornate
-    const hubGeom = new THREE.CylinderGeometry(0.5, 0.6, 0.4, 8);
-    const hubMat = new THREE.MeshBasicMaterial({ color: GOLD_COLOR });
+
+    // Center hub
+    const hubGeom = new THREE.CylinderGeometry(0.6, 0.6, 0.5, 8);
+    const hubMat = new THREE.MeshBasicMaterial({ color: METAL_DARK });
     const hub = new THREE.Mesh(hubGeom, hubMat);
-    hub.position.y = 0.2;
+    hub.position.y = 0.25;
     this.wheelMesh.add(hub);
-    
-    // Center bolt
-    const boltGeom = new THREE.CylinderGeometry(0.2, 0.2, 0.5, 6);
-    const boltMat = new THREE.MeshBasicMaterial({ color: DARK_METAL });
-    const bolt = new THREE.Mesh(boltGeom, boltMat);
-    bolt.position.y = 0.25;
-    this.wheelMesh.add(bolt);
-    
-    // SPOKES
+
+    // Metal supports (cross pattern)
     for (let i = 0; i < 4; i++) {
       const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      const spokeGeom = new THREE.BoxGeometry(WHEEL_RADIUS * 1.2, 0.15, 0.2);
-      const spokeMat = new THREE.MeshBasicMaterial({ color: COPPER_COLOR });
-      const spoke = new THREE.Mesh(spokeGeom, spokeMat);
-      spoke.rotation.y = -angle;
-      spoke.position.y = 0.15;
-      this.wheelMesh.add(spoke);
+      const supportGeom = new THREE.BoxGeometry(WHEEL_RADIUS * 1.6, 0.3, 0.3);
+      const supportMat = new THREE.MeshBasicMaterial({ color: METAL_DARK });
+      const support = new THREE.Mesh(supportGeom, supportMat);
+      support.rotation.y = -angle;
+      support.position.y = 0.2;
+      this.wheelMesh.add(support);
     }
     
     // 4 SLOT HOLES for balls
@@ -129,9 +98,9 @@ export class Wheel {
       slot.position.set(slotX, 0.18, slotZ);
       this.wheelMesh.add(slot);
       
-      // Gold rim around slot
+      // Metal rim around slot
       const slotRimGeom = new THREE.TorusGeometry(0.58, 0.08, 8, 16);
-      const slotRimMat = new THREE.MeshBasicMaterial({ color: GOLD_COLOR });
+      const slotRimMat = new THREE.MeshBasicMaterial({ color: METAL_GRAY });
       const slotRim = new THREE.Mesh(slotRimGeom, slotRimMat);
       slotRim.rotation.x = -Math.PI / 2;
       slotRim.position.set(slotX, 0.32, slotZ);
@@ -140,10 +109,10 @@ export class Wheel {
     
     this.group.add(this.wheelMesh);
     
-    // SELECTION RING - glowing gold!
+    // SELECTION RING - green military indicator!
     const selectionGeom = new THREE.TorusGeometry(WHEEL_RADIUS + 0.5, 0.12, 8, 32);
     const selectionMat = new THREE.MeshBasicMaterial({
-      color: GOLD_COLOR,
+      color: PIPE_GREEN,
       transparent: true,
       opacity: 0
     });
@@ -164,9 +133,9 @@ export class Wheel {
     clampPositions.forEach(({ angle, name }) => {
       const clampGroup = new THREE.Group();
 
-      // Clamp arms - two bronze bars that pinch inward
+      // Clamp arms - military metal bars
       const armGeom = new THREE.BoxGeometry(0.8, 0.25, 0.15);
-      const armMat = new THREE.MeshBasicMaterial({ color: BRONZE_COLOR });
+      const armMat = new THREE.MeshBasicMaterial({ color: METAL_DARK });
 
       const leftArm = new THREE.Mesh(armGeom, armMat);
       leftArm.position.set(-0.3, 0, 0);
@@ -176,9 +145,9 @@ export class Wheel {
       rightArm.position.set(0.3, 0, 0);
       clampGroup.add(rightArm);
 
-      // Gold pin in center
+      // Green indicator pin in center
       const pinGeom = new THREE.CylinderGeometry(0.15, 0.15, 0.3, 8);
-      const pinMat = new THREE.MeshBasicMaterial({ color: GOLD_COLOR });
+      const pinMat = new THREE.MeshBasicMaterial({ color: PIPE_GREEN });
       const pin = new THREE.Mesh(pinGeom, pinMat);
       clampGroup.add(pin);
 

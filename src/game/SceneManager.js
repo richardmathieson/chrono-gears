@@ -1,11 +1,9 @@
 import * as THREE from 'three';
-import { 
-  SCENE_BG_COLOR, 
-  FLOOR_COLOR, 
-  BRONZE_COLOR,
-  COPPER_COLOR,
-  GOLD_COLOR,
-  DARK_METAL
+import {
+  DESERT_SAND,
+  DESERT_DARK,
+  BUILDING_TAN,
+  METAL_GRAY
 } from '../utils/constants.js';
 
 export class SceneManager {
@@ -18,14 +16,12 @@ export class SceneManager {
   
   init() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(SCENE_BG_COLOR);
-    
-    // Orthographic camera - ZOOM OUT MORE for mobile!
+    this.scene.background = new THREE.Color(DESERT_SAND);
+
+    // Orthographic camera - Desert Strike style top-down view!
     const aspect = window.innerWidth / window.innerHeight;
-    const isMobile = window.innerWidth < 768;
-    // More zoom for portrait mode to fit everything!
-    const frustumSize = aspect < 1 ? 45 : (isMobile ? 35 : 30);
-    
+    const frustumSize = 25; // Tighter view to fit everything
+
     this.camera = new THREE.OrthographicCamera(
       -frustumSize * aspect / 2,
       frustumSize * aspect / 2,
@@ -34,24 +30,24 @@ export class SceneManager {
       0.1,
       1000
     );
-    
-    // Top-down view
+
+    // Top-down isometric-ish view
     this.camera.position.set(0, 50, 8);
     this.camera.lookAt(0, 0, 0);
-    
-    this.renderer = new THREE.WebGLRenderer({ 
+
+    this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true 
+      antialias: true
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    
+
     this.setupLighting();
     this.createFloor();
-    
+
     window.addEventListener('resize', () => this.onResize());
-    
-    console.log('⚙️ SceneManager initialized - STEAMPUNK MODE!');
+
+    console.log('🚁 SceneManager initialized - DESERT STRIKE MODE!');
   }
   
   setupLighting() {
@@ -60,113 +56,101 @@ export class SceneManager {
   }
   
   createFloor() {
-    // ⚙️ STEAMPUNK MACHINERY FLOOR! ⚙️
+    // 🚁 DESERT FLOOR! 🚁
     const floorGroup = new THREE.Group();
-    
-    // Dark base
+
+    // Sandy base
     const baseGeom = new THREE.PlaneGeometry(100, 100);
-    const baseMat = new THREE.MeshBasicMaterial({ color: SCENE_BG_COLOR });
+    const baseMat = new THREE.MeshBasicMaterial({ color: DESERT_SAND });
     const base = new THREE.Mesh(baseGeom, baseMat);
     base.rotation.x = -Math.PI / 2;
     base.position.y = -0.2;
     floorGroup.add(base);
-    
-    // Metal plate pattern
-    const plateSize = 4;
-    for (let x = -10; x <= 10; x++) {
-      for (let z = -10; z <= 10; z++) {
-        const plateGeom = new THREE.PlaneGeometry(plateSize - 0.1, plateSize - 0.1);
-        const shade = 0.8 + Math.random() * 0.2;
-        const plateMat = new THREE.MeshBasicMaterial({ 
-          color: new THREE.Color(FLOOR_COLOR).multiplyScalar(shade)
-        });
-        const plate = new THREE.Mesh(plateGeom, plateMat);
-        plate.rotation.x = -Math.PI / 2;
-        plate.position.set(x * plateSize, -0.15, z * plateSize);
-        floorGroup.add(plate);
-        
-        // Rivets at corners
-        if (Math.random() > 0.5) {
-          const rivetGeom = new THREE.CircleGeometry(0.15, 8);
-          const rivetMat = new THREE.MeshBasicMaterial({ color: COPPER_COLOR });
-          const rivet = new THREE.Mesh(rivetGeom, rivetMat);
-          rivet.rotation.x = -Math.PI / 2;
-          rivet.position.set(
-            x * plateSize + (plateSize/2 - 0.3) * (Math.random() > 0.5 ? 1 : -1),
-            -0.12,
-            z * plateSize + (plateSize/2 - 0.3) * (Math.random() > 0.5 ? 1 : -1)
-          );
-          floorGroup.add(rivet);
-        }
-      }
+
+    // Sandy patches for texture
+    for (let i = 0; i < 40; i++) {
+      const patchSize = 2 + Math.random() * 3;
+      const patchGeom = new THREE.CircleGeometry(patchSize, 8);
+      const shade = 0.85 + Math.random() * 0.15;
+      const patchMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(DESERT_DARK).multiplyScalar(shade),
+        transparent: true,
+        opacity: 0.3
+      });
+      const patch = new THREE.Mesh(patchGeom, patchMat);
+      patch.rotation.x = -Math.PI / 2;
+      patch.position.set(
+        (Math.random() - 0.5) * 60,
+        -0.18,
+        (Math.random() - 0.5) * 60
+      );
+      floorGroup.add(patch);
     }
-    
-    // Decorative background gears (non-interactive)
-    this.addBackgroundGears(floorGroup);
-    
+
+    // Desert buildings!
+    this.addDesertBuildings(floorGroup);
+
     this.scene.add(floorGroup);
   }
   
-  addBackgroundGears(parent) {
-    // Add some decorative gears in corners
-    const gearPositions = [
-      { x: -18, z: -18, size: 3 },
-      { x: 18, z: -18, size: 2.5 },
-      { x: -18, z: 18, size: 2 },
-      { x: 18, z: 18, size: 3.5 },
-      { x: -20, z: 0, size: 2 },
-      { x: 20, z: 0, size: 2.5 },
+  addDesertBuildings(parent) {
+    // Desert Strike style buildings scattered around
+    const buildingPositions = [
+      { x: -15, z: -12, w: 3, h: 2, d: 3 },
+      { x: 15, z: -12, w: 2.5, h: 3, d: 2.5 },
+      { x: -16, z: 10, w: 2, h: 2.5, d: 2 },
+      { x: 14, z: 12, w: 3.5, h: 2, d: 2.5 },
+      { x: -18, z: 0, w: 2, h: 1.5, d: 2 },
+      { x: 17, z: 2, w: 2.5, h: 2, d: 2.5 },
     ];
-    
-    gearPositions.forEach(pos => {
-      const gearGroup = new THREE.Group();
-      
-      // Gear disc
-      const discGeom = new THREE.CylinderGeometry(pos.size, pos.size, 0.2, 24);
-      const discMat = new THREE.MeshBasicMaterial({ 
-        color: DARK_METAL,
-        transparent: true,
-        opacity: 0.4
+
+    buildingPositions.forEach(pos => {
+      const buildingGroup = new THREE.Group();
+
+      // Main building
+      const buildingGeom = new THREE.BoxGeometry(pos.w, pos.h, pos.d);
+      const buildingMat = new THREE.MeshBasicMaterial({
+        color: BUILDING_TAN
       });
-      const disc = new THREE.Mesh(discGeom, discMat);
-      gearGroup.add(disc);
-      
-      // Teeth
-      const teethCount = Math.floor(pos.size * 5);
-      for (let i = 0; i < teethCount; i++) {
-        const angle = (i / teethCount) * Math.PI * 2;
-        const toothGeom = new THREE.BoxGeometry(0.2, 0.25, 0.3);
-        const toothMat = new THREE.MeshBasicMaterial({ 
-          color: BRONZE_COLOR,
-          transparent: true,
-          opacity: 0.3
-        });
-        const tooth = new THREE.Mesh(toothGeom, toothMat);
-        tooth.position.set(
-          Math.cos(angle) * (pos.size + 0.1),
-          0,
-          Math.sin(angle) * (pos.size + 0.1)
-        );
-        tooth.rotation.y = -angle;
-        gearGroup.add(tooth);
+      const building = new THREE.Mesh(buildingGeom, buildingMat);
+      building.position.y = pos.h / 2;
+      buildingGroup.add(building);
+
+      // Roof (flat)
+      const roofGeom = new THREE.BoxGeometry(pos.w + 0.3, 0.2, pos.d + 0.3);
+      const roofMat = new THREE.MeshBasicMaterial({
+        color: DESERT_DARK
+      });
+      const roof = new THREE.Mesh(roofGeom, roofMat);
+      roof.position.y = pos.h;
+      buildingGroup.add(roof);
+
+      // Windows (dark squares)
+      const windowCount = Math.floor(Math.random() * 2) + 1;
+      for (let i = 0; i < windowCount; i++) {
+        const windowGeom = new THREE.PlaneGeometry(0.3, 0.4);
+        const windowMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+        const window1 = new THREE.Mesh(windowGeom, windowMat);
+        window1.position.set((pos.w / 2) + 0.01, pos.h * 0.6, (i - 0.5) * 0.8);
+        window1.rotation.y = -Math.PI / 2;
+        buildingGroup.add(window1);
       }
-      
-      gearGroup.position.set(pos.x, -0.1, pos.z);
-      parent.add(gearGroup);
+
+      buildingGroup.position.set(pos.x, 0, pos.z);
+      parent.add(buildingGroup);
     });
   }
   
   onResize() {
     const aspect = window.innerWidth / window.innerHeight;
-    const isMobile = window.innerWidth < 768;
-    const frustumSize = aspect < 1 ? 45 : (isMobile ? 35 : 30);
-    
+    const frustumSize = 25;
+
     this.camera.left = -frustumSize * aspect / 2;
     this.camera.right = frustumSize * aspect / 2;
     this.camera.top = frustumSize / 2;
     this.camera.bottom = -frustumSize / 2;
     this.camera.updateProjectionMatrix();
-    
+
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
   

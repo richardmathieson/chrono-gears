@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PIPE_WIDTH, WHEEL_RADIUS, SLOT_DISTANCE } from '../utils/constants.js';
+import { PIPE_WIDTH, WHEEL_RADIUS, SLOT_DISTANCE, PIPE_GREEN, DESERT_DARK } from '../utils/constants.js';
 
 export class Pipe {
   constructor(startX, startZ, endX, endZ, isSource = false) {
@@ -45,35 +45,38 @@ export class Pipe {
   }
   
   createMesh() {
-    // SIMPLE CLEAN PIPE - just a line!
-    const pipeColor = 0x666666;   // Grey pipe
-    const pipeHeight = 0.15;
-    const pipeWidth = 0.4;
-    
-    // Main pipe body
-    const mainGeom = new THREE.BoxGeometry(this.visualLength, pipeHeight, pipeWidth);
-    const mainMat = new THREE.MeshBasicMaterial({ color: pipeColor });
-    const main = new THREE.Mesh(mainGeom, mainMat);
-    main.position.set(
-      (this.startX + this.endX) / 2,
-      0.08,
-      (this.startZ + this.endZ) / 2
-    );
-    main.rotation.y = -this.angle;
-    this.group.add(main);
-    
-    // Inner darker track
-    const innerGeom = new THREE.BoxGeometry(this.visualLength, pipeHeight + 0.02, pipeWidth * 0.6);
-    const innerMat = new THREE.MeshBasicMaterial({ color: 0x444444 });
+    // DESERT STRIKE GREEN PIPES! 🚁
+    const pipeHeight = 0.6;
+    const pipeWidth = 0.8;
+
+    // Main green pipe body - cylindrical
+    const segments = Math.max(4, Math.floor(this.visualLength / 2));
+    for (let i = 0; i < segments; i++) {
+      const t = i / (segments - 1);
+      const x = this.startX + (this.endX - this.startX) * t;
+      const z = this.startZ + (this.endZ - this.startZ) * t;
+
+      const segmentGeom = new THREE.CylinderGeometry(pipeWidth / 2, pipeWidth / 2, 0.3, 8);
+      const segmentMat = new THREE.MeshBasicMaterial({ color: PIPE_GREEN });
+      const segment = new THREE.Mesh(segmentGeom, segmentMat);
+      segment.position.set(x, pipeHeight / 2, z);
+      segment.rotation.z = Math.PI / 2;
+      segment.rotation.y = -this.angle;
+      this.group.add(segment);
+    }
+
+    // Dark inner channel
+    const innerGeom = new THREE.BoxGeometry(this.visualLength, 0.2, pipeWidth * 0.5);
+    const innerMat = new THREE.MeshBasicMaterial({ color: DESERT_DARK });
     const inner = new THREE.Mesh(innerGeom, innerMat);
     inner.position.set(
       (this.startX + this.endX) / 2,
-      0.1,
+      pipeHeight / 2,
       (this.startZ + this.endZ) / 2
     );
     inner.rotation.y = -this.angle;
     this.group.add(inner);
-    
+
     if (this.isSource) {
       this.createSourceIndicator();
     }

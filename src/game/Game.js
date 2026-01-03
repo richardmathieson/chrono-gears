@@ -178,35 +178,42 @@ export class Game {
   
   createTopTrackMesh() {
     const trackLength = this.topTrack.endX - this.topTrack.startX;
-    
-    // Main track - bronze pipe
-    const trackGeom = new THREE.BoxGeometry(trackLength, 0.4, 1.0);
-    const trackMat = new THREE.MeshBasicMaterial({ color: 0xb87333 });
+
+    // Import green pipe color
+    const { PIPE_GREEN, DESERT_DARK } = require('../utils/constants.js');
+
+    // Main track - green pipe
+    const trackGeom = new THREE.CylinderGeometry(0.5, 0.5, trackLength, 8);
+    const trackMat = new THREE.MeshBasicMaterial({ color: PIPE_GREEN });
     const track = new THREE.Mesh(trackGeom, trackMat);
     track.position.set(
       (this.topTrack.startX + this.topTrack.endX) / 2,
-      0.2,
+      0.6,
       this.topTrack.z
     );
+    track.rotation.z = Math.PI / 2;
     this.sceneManager.scene.add(track);
     this.topTrackMesh = track;
+
+    // Dark inner track
+    const innerGeom = new THREE.BoxGeometry(trackLength, 0.2, 0.4);
+    const innerMat = new THREE.MeshBasicMaterial({ color: DESERT_DARK });
+    const inner = new THREE.Mesh(innerGeom, innerMat);
+    inner.position.set(
+      (this.topTrack.startX + this.topTrack.endX) / 2,
+      0.6,
+      this.topTrack.z
+    );
+    this.sceneManager.scene.add(inner);
     
-    // Gold trim
-    const trimGeom = new THREE.BoxGeometry(trackLength + 0.2, 0.1, 1.1);
-    const trimMat = new THREE.MeshBasicMaterial({ color: 0xd4a84b });
-    const trim = new THREE.Mesh(trimGeom, trimMat);
-    trim.position.copy(track.position);
-    trim.position.y = 0.35;
-    this.sceneManager.scene.add(trim);
-    
-    // Connection lines to wheels
+    // Connection lines to wheels - green pipes!
     this.topTrack.wheelConnections.forEach(wheelIndex => {
       const wheel = this.wheels[wheelIndex];
       const connLen = Math.abs(wheel.z - this.topTrack.z);
-      const connGeom = new THREE.BoxGeometry(0.5, 0.3, connLen);
-      const connMat = new THREE.MeshBasicMaterial({ color: 0xcd7f32, transparent: true, opacity: 0.7 });
+      const connGeom = new THREE.CylinderGeometry(0.4, 0.4, connLen, 8);
+      const connMat = new THREE.MeshBasicMaterial({ color: PIPE_GREEN });
       const conn = new THREE.Mesh(connGeom, connMat);
-      conn.position.set(wheel.x, 0.15, (this.topTrack.z + wheel.z) / 2);
+      conn.position.set(wheel.x, 0.6, (this.topTrack.z + wheel.z) / 2);
       this.sceneManager.scene.add(conn);
     });
   }
@@ -528,33 +535,85 @@ export class Game {
   
   createExplosion(wheel) {
     const pos = wheel.getPosition();
+
+    // DESERT STRIKE EXPLOSION! 💥
+    // Multiple layers: flash, smoke, debris
+
+    // 1. Flash rings (expanding outward)
+    for (let ring = 0; ring < 3; ring++) {
+      const ringGeom = new THREE.TorusGeometry(0.5, 0.3, 8, 16);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: ring === 0 ? 0xffaa00 : (ring === 1 ? 0xff6600 : 0xff3300),
+        transparent: true,
+        opacity: 1
+      });
+      const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+      ringMesh.position.set(pos.x, 0.5 + ring * 0.2, pos.z);
+      ringMesh.rotation.x = -Math.PI / 2;
+      this.sceneManager.scene.add(ringMesh);
+
+      let frame = 0;
+      const animateRing = () => {
+        frame++;
+        const scale = 1 + (frame / 15) * (ring + 1) * 2;
+        ringMesh.scale.set(scale, scale, 1);
+        ringMat.opacity = Math.max(0, 1 - frame / 20);
+
+        if (frame < 20) {
+          requestAnimationFrame(animateRing);
+        } else {
+          this.sceneManager.scene.remove(ringMesh);
+          ringGeom.dispose();
+          ringMat.dispose();
+        }
+      };
+      setTimeout(() => animateRing(), ring * 50);
+    }
+
+    // 2. Particle debris
     const geometry = new THREE.BufferGeometry();
-    const particleCount = 50;
+    const particleCount = 80;
     const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
     const velocities = [];
-    
+
     for (let i = 0; i < particleCount; i++) {
       positions[i * 3] = pos.x;
       positions[i * 3 + 1] = 0.5;
       positions[i * 3 + 2] = pos.z;
+
+      // Mix of orange, yellow, and smoke colors
+      const isSmoke = i > particleCount * 0.6;
+      if (isSmoke) {
+        colors[i * 3] = 0.3;
+        colors[i * 3 + 1] = 0.3;
+        colors[i * 3 + 2] = 0.3;
+      } else {
+        colors[i * 3] = 1;
+        colors[i * 3 + 1] = 0.3 + Math.random() * 0.5;
+        colors[i * 3 + 2] = 0;
+      }
+
       velocities.push({
-        x: (Math.random() - 0.5) * 10,
-        y: Math.random() * 8,
-        z: (Math.random() - 0.5) * 10
+        x: (Math.random() - 0.5) * 15,
+        y: Math.random() * 12 + 3,
+        z: (Math.random() - 0.5) * 15
       });
     }
-    
+
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
     const material = new THREE.PointsMaterial({
-      color: 0xffd700,
-      size: 0.2,
+      size: 0.4,
       transparent: true,
-      opacity: 1
+      opacity: 1,
+      vertexColors: true
     });
-    
+
     const particles = new THREE.Points(geometry, material);
     this.sceneManager.scene.add(particles);
-    
+
     let frame = 0;
     const animateParticles = () => {
       frame++;
@@ -562,13 +621,15 @@ export class Game {
       for (let i = 0; i < particleCount; i++) {
         positions[i * 3] += velocities[i].x * 0.016;
         positions[i * 3 + 1] += velocities[i].y * 0.016;
-        velocities[i].y -= 15 * 0.016;
+        velocities[i].y -= 20 * 0.016; // Gravity
+        velocities[i].x *= 0.98; // Air resistance
+        velocities[i].z *= 0.98;
         positions[i * 3 + 2] += velocities[i].z * 0.016;
       }
       particles.geometry.attributes.position.needsUpdate = true;
-      material.opacity = 1 - (frame / 50);
-      
-      if (frame < 50) {
+      material.opacity = 1 - (frame / 60);
+
+      if (frame < 60) {
         requestAnimationFrame(animateParticles);
       } else {
         this.sceneManager.scene.remove(particles);

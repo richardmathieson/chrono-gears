@@ -14,53 +14,52 @@ export class LevelManager {
   createLevels() {
     return [
       // ===========================================
-      // LEVEL 1 - TOP TRACK DEMO 🛥️
+      // LEVEL 1 - DESERT STRIKE! 🚁
       // ===========================================
-      // 
-      //    [SOURCE]═══════════════════════════[END]
-      //                |           |           |
-      //             [WHEEL 0]  [WHEEL 1]  [WHEEL 2]
-      //                |           |           |
-      //              [BIN]       [BIN]       [BIN]
       //
-      // Balls travel along top track (left to right)
-      // Drop into wheels when passing over empty slot
-      // Player taps balls in wheels to eject down to bins
+      //    [SOURCE]═════════════════════════[END]
+      //                  |         |
+      //              [WHEEL 0] [WHEEL 1]
+      //                  |
+      //              [WHEEL 2]
+      //
+      // 2x2 grid with bottom-right missing
       //
       {
-        colorCount: 2, // PINK and CYAN to start simple!
-        
-        // Top track configuration (NEW!)
+        colorCount: 2, // Start with 2 colors
+
+        // Top track configuration
         topTrack: {
-          startX: -2.5,
-          endX: 2.5,
-          z: -1.5,  // Top of screen
-          wheelConnections: [0, 1, 2] // Wheels connected to this track
+          startX: -2,
+          endX: 2,
+          z: -1.5,
+          wheelConnections: [0, 1] // Top two wheels
         },
-        
+
         wheels: [
-          { x: -1.5, z: 0, requiredColor: 'PINK' },   // 0 - Left
-          { x: 0, z: 0, requiredColor: 'CYAN' },      // 1 - Center
-          { x: 1.5, z: 0, requiredColor: 'PINK' }     // 2 - Right
+          { x: -1, z: 0, requiredColor: 'RED' },    // 0 - Top Left
+          { x: 1, z: 0, requiredColor: 'BLUE' },    // 1 - Top Right
+          { x: -1, z: 1, requiredColor: 'RED' }     // 2 - Bottom Left
         ],
-        
+
         pipes: [
-          // Horizontal pipes connecting wheels (for auto-flow!)
+          // Horizontal: Wheel 0 → Wheel 1
           {
-            startX: -1.5, startZ: 0,
-            endX: 0, endZ: 0,
+            startX: -1, startZ: 0,
+            endX: 1, endZ: 0,
             startWheelIndex: 0,
             startDirection: RIGHT,
             endWheelIndex: 1,
             endDirection: LEFT
           },
+          // Vertical: Wheel 0 → Wheel 2
           {
-            startX: 0, startZ: 0,
-            endX: 1.5, endZ: 0,
-            startWheelIndex: 1,
-            startDirection: RIGHT,
+            startX: -1, startZ: 0,
+            endX: -1, endZ: 1,
+            startWheelIndex: 0,
+            startDirection: BOTTOM,
             endWheelIndex: 2,
-            endDirection: LEFT
+            endDirection: TOP
           }
         ]
       }

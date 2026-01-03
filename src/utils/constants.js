@@ -1,23 +1,23 @@
-// Game Constants - STEAMPUNK GEARS EDITION ⚙️
+// Game Constants - DESERT STRIKE EDITION 🚁
 
-// Colors - Vibrant gem colors (like the reference image!)
+// Colors - Desert military palette
 export const BALL_COLORS = {
-  BLUE: 0x4da6ff,      // Bright blue gem
-  RED: 0xff4d4d,       // Ruby red
-  YELLOW: 0xffd700,    // Gold/amber
-  GREEN: 0x4dff88,     // Emerald green
+  BLUE: 0x3388ff,      // Bright blue
+  RED: 0xff3333,       // Bright red
+  YELLOW: 0xffdd33,    // Yellow
+  GREEN: 0x33ff66,     // Green
 };
 
 export const BALL_COLOR_NAMES = ['BLUE', 'RED', 'YELLOW', 'GREEN'];
 
 // Wheel configuration
-export const WHEEL_RADIUS = 2.0;   // Bigger gears!
+export const WHEEL_RADIUS = 2.0;
 export const WHEEL_SLOT_COUNT = 4;
-export const BALL_RADIUS = 0.5;    // Gem-sized balls
-export const SLOT_DISTANCE = 1.4;  // Slots near edge
+export const BALL_RADIUS = 0.5;
+export const SLOT_DISTANCE = 1.4;
 
-// Grid configuration  
-export const GRID_SPACING = 6;
+// Grid configuration
+export const GRID_SPACING = 8;  // Wider spacing for 2x2 grid
 
 // Directions - for slot/pipe alignment
 export const DIRECTIONS = {
@@ -30,26 +30,22 @@ export const DIRECTIONS = {
 // Animation speeds
 export const ROTATION_SPEED = Math.PI / 2;
 export const ROTATION_DURATION = 150;
-export const BALL_SPEED = 5; // Speed on tracks
-export const TOP_TRACK_SPEED = 4; // Speed on top track
+export const BALL_SPEED = 5;
+export const TOP_TRACK_SPEED = 4;
 export const AUTO_FLOW_INTERVAL = 2000; // Synchronized auto-release every 2 seconds!
 
 // Game timing
-export const TRACK_TIMER = 10; // Seconds before game over if ball doesn't drop!
-export const SPAWN_DELAY = 400; // ms delay before next ball spawns
+export const TRACK_TIMER = 10;
+export const SPAWN_DELAY = 400;
 
 // Visual
 export const PIPE_WIDTH = 0.6;
 
-// Scene - STEAMPUNK! ⚙️
-export const SCENE_BG_COLOR = 0x1a1510;   // Dark brown/bronze
-export const FLOOR_COLOR = 0x2a2015;       // Darker bronze
-export const GRID_LINE_COLOR = 0x3d3020;   // Bronze grid
-export const ACCENT_COLOR = 0xd4a84b;      // Gold accent
-
-// Steampunk palette
-export const BRONZE_COLOR = 0xb87333;
-export const COPPER_COLOR = 0xcd7f32;
-export const GOLD_COLOR = 0xd4a84b;
-export const DARK_METAL = 0x2a2520;
+// DESERT STRIKE PALETTE! 🚁
+export const DESERT_SAND = 0xd4a574;      // Sandy ground
+export const DESERT_DARK = 0x8b7355;      // Dark sand
+export const PIPE_GREEN = 0x2d5016;       // Military green pipes
+export const METAL_GRAY = 0x707070;       // Metal structures
+export const METAL_DARK = 0x404040;       // Dark metal
+export const BUILDING_TAN = 0xc9b896;     // Desert building color
 
